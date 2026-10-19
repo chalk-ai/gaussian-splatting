@@ -29,7 +29,7 @@ watch it converge in the browser, then orbit the result with a WebGL splat rende
 ## Run it
 
 You need [`uv`](https://docs.astral.sh/uv/) and a Chalk environment that can schedule an L4. Credentials
-come from `chalk config` in the current directory, or from `CHALK_API_SERVER`, `CHALK_CLIENT_ID`,
+come from the SDK’s ambient credentials from `chalk login`, or from `CHALK_API_SERVER`, `CHALK_CLIENT_ID`,
 `CHALK_CLIENT_SECRET` and `CHALK_ENVIRONMENT_ID`.
 
 ```bash
@@ -83,3 +83,10 @@ transparent. That growth is what turns a cloud of blobs into fine detail.
 
 The code is Apache-2.0. The Treasure Chest model and the renders of it are CC0. gsplat is
 Apache-2.0, and Spark and three.js are MIT.
+
+## Local authentication
+
+The SDK reads credentials, API host, and the selected environment from your existing
+`chalk login` in `~/.chalk.yml`, including project-scoped and default logins.
+For unattended runs, `CHALK_CLIENT_ID` and `CHALK_CLIENT_SECRET` remain supported. Where available, `--env-id`
+overrides the target environment; otherwise the SDK uses your login or environment settings.

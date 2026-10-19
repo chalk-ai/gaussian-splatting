@@ -9,16 +9,14 @@
 The replica loads the rendered views from `data/treasure_chest` (see render_views.py),
 trains once at boot, and serves a page where visitors watch a run and orbit the result.
 
-Credentials come from `chalk config` in the current directory (or the CHALK_* env vars):
+Credentials come from your existing `chalk login` (or the CHALK_* env vars):
     ./deploy.py [--env-id <environment>] [--gpu nvidia-l4]
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import os
-import subprocess
 import time
 from pathlib import Path
 
@@ -38,17 +36,6 @@ INSTALL = " && ".join(
 )
 
 
-def load_chalk_env(env_id: str | None) -> None:
-    if "CHALK_CLIENT_ID" not in os.environ:
-        cfg = json.loads(subprocess.check_output(["chalk", "config", "--json"]))
-        os.environ["CHALK_API_SERVER"] = cfg["apiServer"]["value"]
-        os.environ["CHALK_CLIENT_ID"] = cfg["clientId"]["value"]
-        os.environ["CHALK_CLIENT_SECRET"] = cfg["clientSecret"]["value"]
-        os.environ.setdefault("CHALK_ENVIRONMENT_ID", cfg["environment"]["value"])
-    if env_id:
-        os.environ["CHALK_ENVIRONMENT_ID"] = env_id
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", default="gaussian-splatting")
@@ -60,7 +47,8 @@ def main() -> None:
     if not (args.scene / "transforms.json").exists():
         raise SystemExit(f"{args.scene} has no transforms.json; run render_views.py first")
 
-    load_chalk_env(args.env_id)
+    if args.env_id:
+        os.environ["CHALK_ENVIRONMENT"] = args.env_id
     from chalkcompute import Image, ReadinessProbe, ScalingGroup
 
     image = (
