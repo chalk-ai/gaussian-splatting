@@ -10,13 +10,11 @@ The replica loads the rendered views from `data/treasure_chest` (see render_view
 trains once at boot, and serves a page where visitors watch a run and orbit the result.
 
 Credentials come from your existing `chalk login` (or the CHALK_* env vars):
-    ./deploy.py [--env-id <environment>] [--gpu nvidia-l4]
+    ./deploy.py
 """
 
 from __future__ import annotations
 
-import argparse
-import os
 import time
 from pathlib import Path
 
@@ -37,32 +35,23 @@ INSTALL = " && ".join(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--name", default="gaussian-splatting")
-    parser.add_argument("--env-id", default=None)
-    parser.add_argument("--gpu", default="nvidia-l4")
-    parser.add_argument("--scene", type=Path, default=HERE / "data" / "treasure_chest")
-    parser.add_argument("--ready-timeout", type=float, default=1800.0)
-    args = parser.parse_args()
-    if not (args.scene / "transforms.json").exists():
-        raise SystemExit(f"{args.scene} has no transforms.json; run render_views.py first")
+    if not (HERE / 'data' / 'treasure_chest' / "transforms.json").exists():
+        raise SystemExit(f"{HERE / 'data' / 'treasure_chest'} has no transforms.json; run render_views.py first")
 
-    if args.env_id:
-        os.environ["CHALK_ENVIRONMENT"] = args.env_id
     from chalkcompute import Image, ReadinessProbe, ScalingGroup
 
     image = (
         Image.debian_slim(python_version="3.10")
         .run_commands(INSTALL)
         # Mounted at start rather than copied: the views are ~20 MB and the code is iterated on.
-        .add_local_dir(str(args.scene), "/data/treasure_chest", strategy="volume")
+        .add_local_dir(str(HERE / 'data' / 'treasure_chest'), "/data/treasure_chest", strategy="volume")
         .add_local_dir(str(HERE / "app"), "/app", strategy="volume")
         .workdir("/app")
     )
     sg = ScalingGroup(
         image=image,
-        name=args.name,
-        gpu=args.gpu,
+        name='gaussian-splatting',
+        gpu='nvidia-l4',
         cpu="4",
         memory="16Gi",
         env={"SCENE_DIR": "/data/treasure_chest"},
@@ -74,7 +63,7 @@ def main() -> None:
         max_replicas=1,
     )
     t0 = time.monotonic()
-    sg.deploy(build_timeout=2400.0, ready_timeout=args.ready_timeout)
+    sg.deploy(build_timeout=2400.0, ready_timeout=1800.0)
     print(f"ready in {time.monotonic() - t0:.0f}s")
     print("web_url:", sg.web_url)
 

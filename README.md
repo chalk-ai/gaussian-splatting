@@ -33,7 +33,7 @@ come from the SDK’s ambient credentials from `chalk login`, or from `CHALK_API
 `CHALK_CLIENT_SECRET` and `CHALK_ENVIRONMENT_ID`.
 
 ```bash
-./deploy.py --gpu nvidia-l4
+./deploy.py
 ```
 
 The first deploy builds a 5.5 GB CUDA image, which takes about eight minutes. The replica trains
@@ -44,7 +44,7 @@ To train your own scene, render it (or bring real photos with known poses) into 
 
 ```bash
 ./render_views.py --model your_model.gltf --out data/your_scene
-./deploy.py --scene data/your_scene
+./deploy.py
 ```
 
 ## How the trainer works
@@ -88,5 +88,5 @@ Apache-2.0, and Spark and three.js are MIT.
 
 The SDK reads credentials, API host, and the selected environment from your existing
 `chalk login` in `~/.chalk.yml`, including project-scoped and default logins.
-For unattended runs, `CHALK_CLIENT_ID` and `CHALK_CLIENT_SECRET` remain supported. Where available, `--env-id`
-overrides the target environment; otherwise the SDK uses your login or environment settings.
+For unattended runs, `CHALK_CLIENT_ID` and `CHALK_CLIENT_SECRET` remain supported.
+The examples use the current environment selected by your Chalk login.
